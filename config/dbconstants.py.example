@@ -1,0 +1,7 @@
+REDDIT_USER = '[must be YOUR Reddit user]'
+REDDIT_PW = '[must be YOUR Reddit password]'
+CLIENT_ID = '[client ID for your Reddit app]'
+CLIENT_SECRET = '[client secret for your Reddit app]'
+USER_AGENT = '[user agent for your Reddit app]'
+EMAIL_SENDER = '[email address to send backup emails from]'
+EMAIL_RECIPIENT = '[email address to send backup emails to]'
