@@ -26,32 +26,32 @@ def send_an_email(message, subject, attachment=None):
 
 def handle_post(post):
     msg = "Title: " + str(post.title) + "\n"
-    msg = msg + "Score: " + str(post.score) + "\n"
-    msg = msg + "Comments: " + str(post.num_comments) + "\n"
-    msg = msg + "Subreddit: " + str(post.subreddit.display_name) + "\n"
-    msg = msg + "Posted at: " + str(post.created_utc) + " UTC\n"
-    msg = msg + "Content:\n"
+    msg += "Score: " + str(post.score) + "\n"
+    msg += "Comments: " + str(post.num_comments) + "\n"
+    msg += "Subreddit: " + str(post.subreddit.display_name) + "\n"
+    msg += "Posted at: " + str(post.created_utc) + " UTC\n"
+    msg += "Content:\n"
     if post.is_self:
-        msg = msg + str(post.selftext)
+        msg += str(post.selftext)
     else:
-        msg = msg + str(post.url)
+        msg += str(post.url)
     return msg
 
 def handle_comment(cmt):
     post_permalink = cmt.submission.permalink
     msg = "Source Post: " + str(post_permalink) + "\n"
-    msg = msg + "Subreddit: " + str(cmt.subreddit.display_name) + "\n"
+    msg += "Subreddit: " + str(cmt.subreddit.display_name) + "\n"
     postID = cmt.link_id
     parentID = cmt.parent_id
     if postID not in parentID: # i.e., the parent is another comment, not the submission
         parent_true_id = parentID.split('_')
         parent_true_id = parent_true_id[1]
         parent_permalink = post_permalink + parent_true_id + "/"
-        msg = msg + "Parent Comment ID: " + str(parent_permalink) + "\n"
-    msg = msg + "Score: " + str(cmt.score) + "\n"
-    msg = msg + "Posted at: " + str(cmt.created_utc) + " UTC\n"
-    msg = msg + "Content:\n"
-    msg = msg + str(cmt.body)
+        msg += "Parent Comment ID: " + str(parent_permalink) + "\n"
+    msg += "Score: " + str(cmt.score) + "\n"
+    msg += "Posted at: " + str(cmt.created_utc) + " UTC\n"
+    msg += "Content:\n"
+    msg += str(cmt.body)
     return msg
 
 def craft_message(r_obj):
