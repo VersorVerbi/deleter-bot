@@ -65,7 +65,7 @@ r = praw.Reddit(user_agent=config.USER_AGENT, client_id=config.CLIENT_ID, client
 try:
     while True:
         rdtr = r.redditor('versorverbi')
-        posts = rdtr.submissions.top()
+        posts = rdtr.submissions.new()
         rightnow = datetime.datetime.utcnow()
         rightnow_timestamp = (rightnow - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1)
         for post in posts:
@@ -84,7 +84,7 @@ try:
                 post.delete()
                 if filename != None:
                     os.remove(filename)
-        cmts = rdtr.comments.top()
+        cmts = rdtr.comments.new()
         for cmt in cmts:
             cmt_time = cmt.created_utc
             if rightnow_timestamp - cmt_time >= SECONDS_IN_MONTH:
