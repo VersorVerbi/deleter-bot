@@ -5,6 +5,7 @@ import urllib.request
 import os
 import imghdr
 from email.message import EmailMessage
+from time import sleep
 from config import dbconstants as config
 
 # non-config constants
@@ -91,6 +92,7 @@ try:
                 send_an_email(craft_message(cmt),"Comment on: " + cmt.submission.title)
                 cmt.edit("[removed]")
                 cmt.delete()
+        sleep(86400) # there's no good reason to check this more often than 1/day
 except Exception as e:
     print(e)
     send_an_email(str(e), 'Exception thrown')
