@@ -9,7 +9,8 @@ from time import sleep
 from config import dbconstants as config
 
 # non-config constants
-SECONDS_IN_MONTH = 2592000 # pretending all months are 30 days exactly
+SECONDS_IN_MONTH = 2592000  # pretending all months are 30 days exactly
+
 
 def send_an_email(message, subject, attachment=None):
     mail_server = smtplib.SMTP('localhost')
@@ -18,42 +19,45 @@ def send_an_email(message, subject, attachment=None):
     msg['To'] = config.EMAIL_RECIPIENT
     msg['Subject'] = subject
     msg.set_content(message)
-    if attachment != None:
+    if attachment is not None:
         with open(attachment, 'rb') as fp:
             img_data = fp.read()
-        msg.add_attachment(img_data, maintype='image',subtype=imghdr.what(None, img_data))
+        msg.add_attachment(img_data, maintype='image', subtype=imghdr.what(None, img_data))
     mail_server.send_message(msg)
     mail_server.quit()
 
-def handle_post(post):
-    msg = "Title: " + str(post.title) + "\n"
-    msg += "Score: " + str(post.score) + "\n"
-    msg += "Comments: " + str(post.num_comments) + "\n"
-    msg += "Subreddit: " + str(post.subreddit.display_name) + "\n"
-    msg += "Posted at: " + str(post.created_utc) + " UTC\n"
+
+def handle_post(post_to_handle):
+    msg = "Title: " + str(post_to_handle.title) + "\n"
+    msg += "Score: " + str(post_to_handle.score) + "\n"
+    msg += "Comments: " + str(post_to_handle.num_comments) + "\n"
+    msg += "Subreddit: " + str(post_to_handle.subreddit.display_name) + "\n"
+    msg += "Posted at: " + str(post_to_handle.created_utc) + " UTC\n"
     msg += "Content:\n"
-    if post.is_self:
-        msg += str(post.selftext)
+    if post_to_handle.is_self:
+        msg += str(post_to_handle.selftext)
     else:
-        msg += str(post.url)
+        msg += str(post_to_handle.url)
     return msg
 
-def handle_comment(cmt):
-    post_permalink = cmt.submission.permalink
+
+def handle_comment(cmt_to_handle):
+    post_permalink = cmt_to_handle.submission.permalink
     msg = "Source Post: " + str(post_permalink) + "\n"
-    msg += "Subreddit: " + str(cmt.subreddit.display_name) + "\n"
-    postID = cmt.link_id
-    parentID = cmt.parent_id
-    if postID not in parentID: # i.e., the parent is another comment, not the submission
-        parent_true_id = parentID.split('_')
+    msg += "Subreddit: " + str(cmt_to_handle.subreddit.display_name) + "\n"
+    post_id = cmt_to_handle.link_id
+    parent_id = cmt_to_handle.parent_id
+    if post_id not in parent_id:  # i.e., the parent is another comment, not the submission
+        parent_true_id = parent_id.split('_')
         parent_true_id = parent_true_id[1]
         parent_permalink = post_permalink + parent_true_id + "/"
         msg += "Parent Comment ID: " + str(parent_permalink) + "\n"
-    msg += "Score: " + str(cmt.score) + "\n"
-    msg += "Posted at: " + str(cmt.created_utc) + " UTC\n"
+    msg += "Score: " + str(cmt_to_handle.score) + "\n"
+    msg += "Posted at: " + str(cmt_to_handle.created_utc) + " UTC\n"
     msg += "Content:\n"
-    msg += str(cmt.body)
+    msg += str(cmt_to_handle.body)
     return msg
+
 
 def craft_message(r_obj):
     if isinstance(r_obj, praw.models.Submission):
@@ -61,7 +65,10 @@ def craft_message(r_obj):
     else:
         return handle_comment(r_obj)
 
-r = praw.Reddit(user_agent=config.USER_AGENT, client_id=config.CLIENT_ID, client_secret=config.CLIENT_SECRET, username=config.REDDIT_USER, password=config.REDDIT_PW)
+
+# main
+r = praw.Reddit(user_agent=config.USER_AGENT, client_id=config.CLIENT_ID, client_secret=config.CLIENT_SECRET,
+                username=config.REDDIT_USER, password=config.REDDIT_PW)
 
 try:
     while True:
@@ -77,22 +84,22 @@ try:
                     if 'redd.it' in post.url:
                         filename = post.url.split('/')
                         filename = filename[len(filename)-1]
-                        filename = os.path.join(os.path.expanduser('~'),filename)
+                        filename = os.path.join(os.path.expanduser('~'), filename)
                         urllib.request.urlretrieve(post.url, filename)
-                send_an_email(craft_message(post),post.title,filename)
+                send_an_email(craft_message(post), post.title, filename)
                 if post.is_self:
                     post.edit("[removed]")
                 post.delete()
-                if filename != None:
+                if filename is not None:
                     os.remove(filename)
         cmts = rdtr.comments.new()
         for cmt in cmts:
             cmt_time = cmt.created_utc
             if rightnow_timestamp - cmt_time >= SECONDS_IN_MONTH:
-                send_an_email(craft_message(cmt),"Comment on: " + cmt.submission.title)
+                send_an_email(craft_message(cmt), "Comment on: " + cmt.submission.title)
                 cmt.edit("[removed]")
                 cmt.delete()
-        sleep(86400) # there's no good reason to check this more often than 1/day
+        sleep(86400)  # there's no good reason to check this more often than 1/day
 except Exception as e:
     print(e)
     send_an_email(str(e), 'Exception thrown')

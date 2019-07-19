@@ -104,3 +104,10 @@ venv.bak/
 .mypy_cache/
 
 config/dbconstants.py
+.idea/deleter-bot.iml
+.idea/dictionaries/verso.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml
